@@ -40,7 +40,7 @@ def events():
         else:
             return redirect('/')
 
-@app.route("/events/<ID>", methods=["GET"])
+@app.route("/events/", methods=["GET"])
 def retrieve_event():
     try:
         id_ =request.args.get("ID")
