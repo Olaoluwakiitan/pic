@@ -1,4 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import DateTime
+
 db = SQLAlchemy()
 
 
@@ -6,7 +8,7 @@ class CalendarModel(db.Model):
     __tablename__ = "events"
 
     event_id = db.Column(db.Integer, primary_key=True)
-    event_time = db.Column(db.String())
+    event_time = db.Column(DateTime, nullable=False)
     description = db.Column(db.String())
 
     def __init__(self, id_, time_, description):

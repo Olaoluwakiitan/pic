@@ -1,0 +1,25 @@
+1. check out the repository or download the Pic folder from the github link
+2. navigate to the Dockerfile in your location and run the Dockerfile via your choice IDE or through the CMD
+3. After a successful run and build of the Dockerfile the port designated would be listed.
+4. Click on the port to start interacting with the Pic Calendar event service.
+
+A. Adding Calendar Events
+i. this must be done using json format; example event entry is as follows -
+{"description : "Test Completion",
+"time": 2025-01-23 23:59:59,
+"id": 1}
+
+ii. The above should be entered into another terminal client terminal to the port provided by the Docker. and example entry (post) of event to the calendar is as follows -
+requests.post('http://127.0.0.1:1000/events', json={"description : "Test Completion",
+"time": 2025-01-23 23:59:59,
+"id": 1})
+
+B. Retrieving events by ID via call to the endpoint: /events/
+  The example id search calls to the service is as follows-
+requests.get('http://127.0.0.1:1000/events/', params={"ID" : 1})
+
+C. Retrieving events within dates via call to the endpoint: /events
+The example date search of events is as follows-
+requests.get('http://127.0.0.1:1000/events',
+params={"datetime_format" : "%Y-%m-%d %H:%M:%S",
+ "from_time": "2025-01-10 00:00:00", "to_time":2025-01-23 23:59:59})

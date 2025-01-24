@@ -16,13 +16,16 @@ default_to_time = datetime.now()
 def create_table():
     db.create_all()
 
+
 @app.route('/')
 def run():
     event_ = CalendarModel.query.all()
-    if bool(event_):
-        return [row.get_event() for row in event_]
+    if event_ is None:
+        return make_response(jsonify({"message": f" No calendar event not found"}), 200)
+    if isinstance(event_, list):
+        return jsonify([row.get_event() for row in event_])
     else:
-        jsonify("{description: Calendar events, time:  current time, id:  request_id}")
+        return jsonify(event_.get_event())
 
 @app.route('/events', methods=['POST'])
 def events():
@@ -38,7 +41,7 @@ def events():
             return redirect('/')
 
         else:
-            return redirect('/')
+            return make_response(jsonify({"message": "Invalid input"}), 404)
 
 @app.route("/events/", methods=["GET"])
 def retrieve_event():
@@ -46,24 +49,32 @@ def retrieve_event():
         id_ =request.args.get("ID")
         result_format = request.args.get("datetime_format") if "datetime_format" in request.args else default_time_format
         event_ = CalendarModel.query.filter_by(event_id=id_).first()
-        if event_:
-            return  [row.get_event() for row in event_]
+        if event_ is None:
+            return make_response(jsonify({"message": f" ID {id_} calendar event not found"}), 200)
+        if isinstance(event_, list):
+            return jsonify([row.get_event() for row in event_])
         else:
-            make_response(jsonify({"message": f" ID {id_} calendar event not found"}), 200)
+            return jsonify(event_.get_event())
     except:
         return make_response(jsonify({"message": "Invalid input"}), 404)
 
 @app.route("/events", methods=["GET"])
 def retrieve_events():
     try:
-        if "from_time" in request.args or "to_time" in request.args:
-            result_format = request.args.get("datetime_format") if "datetime_format" in request.args  else default_time_format
-            event_start_time = request.args.get("from_time") if "from_time" in request.args  else default_start_time
-            event_stop_time = request.args.get("to_time") if "to_time" in request.args  else default_to_time
-            events_ = CalendarModel.query.filter(CalendarModel.event_id.between(event_start_time, event_stop_time)).all()
-            return [row.get_event() for row in events_]
+            result_format = request.args.get("datetime_format") if "datetime_format" in request.args else default_time_format
+            from_time = request.args.get("from_time") if "from_time" in request.args else default_start_time
+            to_time = request.args.get("to_time") if "to_time" in request.args  else default_to_time
+            event_start_time = datetime.strptime(from_time, result_format)
+            event_stop_time = datetime.strptime(to_time, result_format)
+            events_ = CalendarModel.query.filter(CalendarModel.event_time.between(event_start_time, event_stop_time)).all()
+            if events_ is None:
+                return make_response(jsonify({"message": f" No calendar event not found"}), 200)
+            if isinstance(events_, list):
+                return jsonify([row.get_event() for row in events_])
+            else:
+                return jsonify(events_.get_events())
     except:
-        return make_response(jsonify({"message": "Invalid input"}), 404)
+        return make_response(jsonify({"message": "Invalid Date input"}), 404)
 
 
 if __name__ == '__main__':
